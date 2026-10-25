@@ -1,0 +1,11 @@
+file_format: "1"
+id: origin36
+name: Origin36
+type: shield
+url: https://github.com/
+requires: [pro_micro]
+features:
+  - keys
+siblings:
+  - origin36_left
+  - origin36_right

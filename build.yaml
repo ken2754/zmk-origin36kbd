@@ -1,0 +1,9 @@
+# Configuration for ZMK GitHub Actions build
+---
+include:
+  - board: nice_nano_v2
+    shield: origin36_left
+  - board: nice_nano_v2
+    shield: origin36_right
+  - board: nice_nano_v2
+    shield: settings_reset

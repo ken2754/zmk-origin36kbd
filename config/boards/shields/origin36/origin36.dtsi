@@ -1,0 +1,50 @@
+/*
+ * Copyright (c) 2024 The ZMK Contributors
+ * SPDX-License-Identifier: MIT
+ */
+
+#include <dt-bindings/zmk/matrix_transform.h>
+
+/ {
+    chosen {
+        zmk,kscan = &kscan0;
+        zmk,matrix-transform = &default_transform;
+    };
+
+    default_transform: matrix_transform {
+        compatible = "zmk,matrix-transform";
+        rows = <1>;
+        columns = <36>;
+        map = <
+            RC(0,0)  RC(0,1)  RC(0,2)  RC(0,3)  RC(0,4)    RC(0,22) RC(0,21) RC(0,20) RC(0,19) RC(0,18)
+            RC(0,5)  RC(0,6)  RC(0,7)  RC(0,8)  RC(0,9)    RC(0,27) RC(0,26) RC(0,25) RC(0,24) RC(0,23)
+            RC(0,10) RC(0,11) RC(0,12) RC(0,13) RC(0,14)   RC(0,32) RC(0,31) RC(0,30) RC(0,29) RC(0,28)
+                              RC(0,15) RC(0,16) RC(0,17)   RC(0,35) RC(0,34) RC(0,33)
+        >;
+    };
+
+    kscan0: kscan {
+        compatible = "zmk,kscan-gpio-direct";
+        wakeup-source;
+        input-gpios
+            = <&gpio0 6  (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> // 0:  Row 0, Col 0 (Q / P) -> Silk: 006 (pro_micro 1)
+            , <&gpio0 8  (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> // 1:  Row 0, Col 1 (W / O) -> Silk: 008 (pro_micro 0)
+            , <&gpio0 17 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> // 2:  Row 0, Col 2 (E / I) -> Silk: 017 (pro_micro 2)
+            , <&gpio0 20 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> // 3:  Row 0, Col 3 (R / U) -> Silk: 020 (pro_micro 3)
+            , <&gpio0 22 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> // 4:  Row 0, Col 4 (T / Y) -> Silk: 022 (pro_micro 4)
+            , <&gpio0 24 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> // 5:  Row 1, Col 0 (A / ;) -> Silk: 024 (pro_micro 5)
+            , <&gpio1 0  (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> // 6:  Row 1, Col 1 (S / L) -> Silk: 100 (pro_micro 6)
+            , <&gpio0 11 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> // 7:  Row 1, Col 2 (D / K) -> Silk: 011 (pro_micro 7)
+            , <&gpio1 4  (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> // 8:  Row 1, Col 3 (F / J) -> Silk: 104 (pro_micro 8)
+            , <&gpio1 6  (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> // 9:  Row 1, Col 4 (G / H) -> Silk: 106 (pro_micro 9)
+            , <&gpio0 31 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> // 10: Row 2, Col 0 (Z / /) -> Silk: 031 (pro_micro 21)
+            , <&gpio0 29 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> // 11: Row 2, Col 1 (X / .) -> Silk: 029 (pro_micro 20)
+            , <&gpio0 2  (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> // 12: Row 2, Col 2 (C / ,) -> Silk: 002 (pro_micro 19)
+            , <&gpio1 15 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> // 13: Row 2, Col 3 (V / M) -> Silk: 115 (pro_micro 18)
+            , <&gpio1 13 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> // 14: Row 2, Col 4 (B / N) -> Silk: 113 (pro_micro 15)
+            , <&gpio0 9  (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> // 15: Thumb Outer          -> Silk: 009 (pro_micro 10)
+            , <&gpio0 10 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> // 16: Thumb Mid            -> Silk: 010 (pro_micro 16)
+            , <&gpio1 11 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> // 17: Thumb Inner          -> Silk: 111 (pro_micro 14)
+            ;
+    };
+};

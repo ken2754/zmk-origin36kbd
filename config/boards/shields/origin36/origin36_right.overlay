@@ -1,0 +1,10 @@
+/*
+ * Copyright (c) 2024 The ZMK Contributors
+ * SPDX-License-Identifier: MIT
+ */
+
+#include "origin36.dtsi"
+
+&default_transform {
+    col-offset = <18>;
+};

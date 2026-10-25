@@ -1,0 +1,50 @@
+# ZMK CLI
+.zmk/
+
+# Build artifacts & output directories
+build/
+build_*/
+out/
+dist/
+firmware/
+firmware*.zip
+
+# Compiled firmware files
+*.uf2
+*.bin
+*.hex
+*.elf
+*.map
+
+# West workspace & dependencies (if west workspace is initialized in repo)
+.west/
+bootloader/
+modules/
+tools/
+zephyr/
+zmk/
+optional/
+
+# Build caches & logs
+.cache/
+.ccache/
+*.log
+.ninja_log
+
+# Python virtual environment & cache (used by west and build tools)
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+
+# IDE & Editor temporary files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS temporary files
+.DS_Store
+Thumbs.db

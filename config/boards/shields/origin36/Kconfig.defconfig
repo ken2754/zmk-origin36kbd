@@ -1,0 +1,19 @@
+# Copyright (c) 2024 The ZMK Contributors
+# SPDX-License-Identifier: MIT
+
+if SHIELD_ORIGIN36_LEFT
+
+config ZMK_KEYBOARD_NAME
+    default "Origin36"
+
+config ZMK_SPLIT_ROLE_CENTRAL
+    default y
+
+endif
+
+if SHIELD_ORIGIN36_RIGHT
+
+config ZMK_KEYBOARD_NAME
+    default "Origin36"
+
+endif
