@@ -17,3 +17,10 @@ config ZMK_KEYBOARD_NAME
     default "Origin36"
 
 endif
+
+if SHIELD_ORIGIN36_LEFT || SHIELD_ORIGIN36_RIGHT
+
+config ZMK_SPLIT
+    default y
+
+endif
