@@ -30,6 +30,24 @@ static const struct gpio_dt_spec wake_key = GPIO_DT_SPEC_GET(WAKE_KEY_NODE, gpio
 #define POLL_US 5000U
 #define RELEASE_DEBOUNCE_SAMPLES 4U
 
+/*
+ * Magic value stored in NRF_POWER->GPREGRET2 (register index 1) right before
+ * entering soft off via zmk_pm_soft_off(). This distinguishes an explicit
+ * soft off from an inactivity deep sleep (which also uses sys_poweroff()).
+ */
+#define SOFT_OFF_GPREGRET_REG   1U
+#define SOFT_OFF_GPREGRET_MAGIC 0x93U
+
+extern int __real_zmk_pm_soft_off(void);
+
+int __wrap_zmk_pm_soft_off(void) {
+    nrf_power_gpregret_set(NRF_POWER, SOFT_OFF_GPREGRET_REG, SOFT_OFF_GPREGRET_MAGIC);
+    int ret = __real_zmk_pm_soft_off();
+    /* Only reached if soft off failed and returned instead of powering off. */
+    nrf_power_gpregret_set(NRF_POWER, SOFT_OFF_GPREGRET_REG, 0);
+    return ret;
+}
+
 static bool wake_key_pressed(void) { return gpio_pin_get_dt(&wake_key) > 0; }
 
 /*
@@ -62,29 +80,33 @@ static void return_to_soft_off(void) {
         return;
     }
 
+    /* Preserve the soft-off marker for the next wakeup attempt. */
+    nrf_power_gpregret_set(NRF_POWER, SOFT_OFF_GPREGRET_REG, SOFT_OFF_GPREGRET_MAGIC);
     sys_poweroff();
 }
 
 static int soft_off_wake_guard_init(void) {
     uint32_t reas = nrf_power_resetreas_get(NRF_POWER);
+    uint32_t gpregret = nrf_power_gpregret_get(NRF_POWER, SOFT_OFF_GPREGRET_REG);
 
-    /* RESETREAS is cumulative: clear OFF so a later normal reset isn't misdetected. */
+    /*
+     * Clear both immediately so later normal resets or wakes from inactivity
+     * deep sleep are not mistaken for soft-off wakes.
+     */
     nrf_power_resetreas_clear(NRF_POWER, NRF_POWER_RESETREAS_OFF_MASK);
+    nrf_power_gpregret_set(NRF_POWER, SOFT_OFF_GPREGRET_REG, 0);
+
+    bool woke_from_soft_off = (gpregret == SOFT_OFF_GPREGRET_MAGIC) &&
+                              (((reas & NRF_POWER_RESETREAS_OFF_MASK) != 0) || (reas == 0));
+    if (!woke_from_soft_off) {
+        return 0;
+    }
 
     if (!gpio_is_ready_dt(&wake_key) || gpio_pin_configure_dt(&wake_key, GPIO_INPUT) < 0) {
         /* Fail safe: boot normally. */
         return 0;
     }
     k_busy_wait(100); /* let the pull-up settle */
-
-    bool woke_from_off = (reas & NRF_POWER_RESETREAS_OFF_MASK) != 0;
-    /* Fallback in case RESETREAS was cleared earlier (e.g. by the bootloader). */
-    bool power_on_with_key = (reas == 0) && wake_key_pressed();
-
-    if (!woke_from_off && !power_on_with_key) {
-        gpio_pin_configure_dt(&wake_key, GPIO_DISCONNECTED);
-        return 0;
-    }
 
     if (!wake_key_held_for(CONFIG_SOFT_OFF_WAKE_GUARD_HOLD_MS)) {
         return_to_soft_off();
