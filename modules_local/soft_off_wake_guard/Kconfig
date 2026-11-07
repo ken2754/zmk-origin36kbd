@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: MIT
+
+config SOFT_OFF_WAKE_GUARD
+    bool "Require a long press of the soft off wake key to wake up"
+    default y
+    depends on ZMK_PM_SOFT_OFF && SOC_SERIES_NRF52X
+    depends on $(dt_nodelabel_enabled,soft_off_wake_key)
+    help
+      After waking from soft off (nRF52 System OFF), check at boot that the
+      key labelled `soft_off_wake_key` in devicetree is held continuously for
+      SOFT_OFF_WAKE_GUARD_HOLD_MS. If it is released earlier, the device goes
+      straight back into soft off.
+
+if SOFT_OFF_WAKE_GUARD
+
+config SOFT_OFF_WAKE_GUARD_HOLD_MS
+    int "Hold time (ms) required to wake from soft off"
+    default 1500
+
+config SOFT_OFF_WAKE_GUARD_RELEASE_WAIT_MS
+    int "Max time (ms) to wait for the key to be released after a successful wake"
+    default 3000
+    help
+      Delays the rest of the boot until the wake key is released (up to this
+      many ms) so the held key is not reported as a key press after boot.
+      Set to 0 to disable.
+
+endif

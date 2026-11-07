@@ -1,9 +1,17 @@
 # Configuration for ZMK GitHub Actions build
+#
+# - The left half (Central) is built with the `studio-rpc-usb-uart` snippet
+#   to enable ZMK Studio over USB.
+# - Both halves load the local `soft_off_wake_guard` module (long press to
+#   wake from soft off).
 ---
 include:
   - board: nice_nano_v2
     shield: origin36_left
+    snippet: studio-rpc-usb-uart
+    cmake-args: -DZMK_EXTRA_MODULES=${GITHUB_WORKSPACE}/modules_local/soft_off_wake_guard
   - board: nice_nano_v2
     shield: origin36_right
+    cmake-args: -DZMK_EXTRA_MODULES=${GITHUB_WORKSPACE}/modules_local/soft_off_wake_guard
   - board: nice_nano_v2
     shield: settings_reset

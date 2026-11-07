@@ -28,11 +28,16 @@ zmk-origin36/
 │   │   ├── Kconfig.shield      # Shield enable definition
 │   │   ├── Kconfig.defconfig   # Default configs (Left half as Central)
 │   │   ├── origin36.zmk.yml    # ZMK shield metadata
-│   │   ├── origin36.dtsi       # Shared direct GPIO matrix & transform
+│   │   ├── origin36-layouts.dtsi   # Physical layout (for ZMK Studio)
+│   │   ├── origin36.dtsi       # Shared direct GPIO matrix, transform & soft off wakeup key
+│   │   ├── origin36_left.conf      # Left half only settings (ZMK Studio)
 │   │   ├── origin36_left.overlay   # Left half overlay
 │   │   ├── origin36_right.overlay  # Right half overlay (col-offset 18)
 │   │   └── origin36.keymap     # 36-key keymap definition
-│   └── origin36.conf           # BLE transmit power and sleep settings
+│   ├── origin36.conf           # BLE transmit power, sleep and soft off settings
+│   └── west.yml                # West manifest for GitHub Actions (ZMK v0.3.0)
+├── modules_local/
+│   └── soft_off_wake_guard/    # Zephyr module: long-press requirement for waking from soft off
 ├── build.yaml                  # Targets for GitHub Actions build
 ├── setup.sh                    # Local build environment setup script (Docker)
 ├── build.sh                    # Local firmware build script (Docker)
@@ -44,7 +49,7 @@ zmk-origin36/
 
 ## Pinout Summary
 
-For detailed wiring diagrams and step-by-step assembly instructions, refer to [WIRING_GUIDE.md](file:///home/ken/git/zmk-origin36/WIRING_GUIDE.md).
+For detailed wiring diagrams and step-by-step assembly instructions, refer to [WIRING_GUIDE.md](WIRING_GUIDE.md).
 
 - **Switch Common Terminal**: Daisy-chain one pin of each switch to the MCU **GND** pin.
 - **Switch Individual Terminal**: Connect the other pin directly to the corresponding MCU silkscreen pin.
@@ -104,13 +109,37 @@ Compiled `.uf2` binaries are automatically placed in the `firmware/` directory.
 ### 2. Building with GitHub Actions
 
 1. Fork or push this repository to your GitHub account.
-2. Go to the **Actions** tab on your GitHub repository.
-3. Select the **Build ZMK firmware** workflow on the left sidebar, and click **Run workflow** to manually trigger a build.
-4. Once completed, download `firmware.zip` from the **Artifacts** section of the workflow run summary.
-5. Extracted zip contains:
-   - `origin36_left-nice_nano_v2-zmk.uf2` (Left half)
+2. The **Build ZMK firmware** workflow runs automatically on every push / pull request. You can also trigger it manually from the **Actions** tab (select the workflow on the left sidebar and click **Run workflow**).
+3. Once completed, download `firmware.zip` from the **Artifacts** section of the workflow run summary.
+4. Extracted zip contains:
+   - `origin36_left-nice_nano_v2-zmk.uf2` (Left half, with ZMK Studio support)
    - `origin36_right-nice_nano_v2-zmk.uf2` (Right half)
    - `settings_reset-nice_nano_v2-zmk.uf2` (Bluetooth pairing reset)
+
+The build targets are defined in `build.yaml`. Like the local build, the left half is built with the `studio-rpc-usb-uart` snippet and both halves load the `modules_local/soft_off_wake_guard` module.
+
+---
+
+## ZMK Studio
+
+The keymap can be edited live with [ZMK Studio](https://zmk.studio/) (both builds above support it).
+
+- Connect the **left half** (Central) to your computer with a USB cable and open [zmk.studio](https://zmk.studio/) in a Chromium-based browser (or use the desktop app).
+- Studio locking is disabled (`CONFIG_ZMK_STUDIO_LOCKING=n` in `origin36_left.conf`), so no unlock key is required.
+- Changes made in Studio are saved on the keyboard and take precedence over `origin36.keymap`. Use **Restore Stock Settings** in Studio to go back to the keymap in this repository.
+
+---
+
+## Soft Off
+
+- Put `&soft_off` in your keymap. Triggering it turns **both halves** off (the right half turns off on press, the left half on release).
+- To wake up a half, **hold F (left) / J (right) for 1.5 seconds** (pin P1.04 / pro_micro 8). A shorter press puts it straight back to soft off. Each half must be woken individually. The reset button also wakes it.
+- After a successful wake, boot waits until the key is released (max 3 s) so the held key is not typed.
+- The timings can be changed in `config/origin36.conf`:
+  ```
+  CONFIG_SOFT_OFF_WAKE_GUARD_HOLD_MS=1500
+  CONFIG_SOFT_OFF_WAKE_GUARD_RELEASE_WAIT_MS=3000
+  ```
 
 ---
 
@@ -127,4 +156,3 @@ Compiled `.uf2` binaries are automatically placed in the `firmware/` directory.
 If the split halves fail to communicate via Bluetooth:
 1. Flash `settings_reset-nice_nano_v2-zmk.uf2` to **both** controllers to erase bonding and network metadata.
 2. Re-flash the corresponding firmware (`left` / `right`) to each half.
-# zmk-origin36kbd

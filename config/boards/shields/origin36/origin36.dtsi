@@ -4,11 +4,12 @@
  */
 
 #include <dt-bindings/zmk/matrix_transform.h>
+#include "origin36-layouts.dtsi"
 
 / {
     chosen {
         zmk,kscan = &kscan0;
-        zmk,matrix-transform = &default_transform;
+        zmk,physical-layout = &origin36_physical_layout;
     };
 
     default_transform: matrix_transform {
@@ -46,5 +47,29 @@
             , <&gpio0 10 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> // 16: Thumb Mid            -> Silk: 010 (pro_micro 16)
             , <&gpio1 11 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)> // 17: Thumb Inner          -> Silk: 111 (pro_micro 14)
             ;
+    };
+
+    /*
+     * Soft off wakeup source: P1.04 (pro_micro 8) = F (left) / J (right).
+     * Only this key can wake the half from soft off. The required long press
+     * (CONFIG_SOFT_OFF_WAKE_GUARD_HOLD_MS) is enforced by the
+     * modules_local/soft_off_wake_guard module at boot.
+     */
+    wakeup_keys {
+        compatible = "gpio-keys";
+        soft_off_wake_key: soft_off_wake_key {
+            gpios = <&gpio1 4 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+        };
+    };
+
+    soft_off_wakeup_trigger: soft_off_wakeup_trigger {
+        compatible = "zmk,gpio-key-wakeup-trigger";
+        trigger = <&soft_off_wake_key>;
+        wakeup-source;
+    };
+
+    soft_off_wakers {
+        compatible = "zmk,soft-off-wakeup-sources";
+        wakeup-sources = <&soft_off_wakeup_trigger>;
     };
 };

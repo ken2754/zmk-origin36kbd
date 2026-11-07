@@ -1,0 +1,4 @@
+name: soft_off_wake_guard
+build:
+  cmake: .
+  kconfig: Kconfig

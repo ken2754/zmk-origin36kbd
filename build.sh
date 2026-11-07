@@ -122,6 +122,11 @@ build_target() {
         pristine_arg="-p"
     fi
 
+    local snippet_arg=""
+    if [[ "${target_name}" == "left" ]]; then
+        snippet_arg="-S studio-rpc-usb-uart"
+    fi
+
     # Build inside container
     docker run --rm \
         --user "$(id -u):$(id -g)" \
@@ -129,9 +134,10 @@ build_target() {
         -w "${CONTAINER_WORKSPACE}" \
         "${DOCKER_IMAGE}" \
         bash -c "west zephyr-export >/dev/null 2>&1 && \
-                 west build -s zmk/app -d build/${target_name} -b ${board} ${pristine_arg} -- \
+                 west build -s zmk/app -d build/${target_name} -b ${board} ${snippet_arg} ${pristine_arg} -- \
                  -DSHIELD=${shield} \
-                 -DZMK_CONFIG=${CONTAINER_WORKSPACE}/config"
+                 -DZMK_CONFIG=${CONTAINER_WORKSPACE}/config \
+                 -DZMK_EXTRA_MODULES=${CONTAINER_WORKSPACE}/modules_local/soft_off_wake_guard"
 
     # Copy output uf2
     local src_uf2="${target_build_dir}/zephyr/zmk.uf2"

@@ -17,13 +17,14 @@ firmware*.zip
 *.map
 
 # West workspace & dependencies (if west workspace is initialized in repo)
-.west/
-bootloader/
-modules/
-tools/
-zephyr/
-zmk/
-optional/
+# Anchored to the repo root so that modules_local/*/zephyr/module.yml is tracked
+/.west/
+/bootloader/
+/modules/
+/tools/
+/zephyr/
+/zmk/
+/optional/
 
 # Build caches & logs
 .cache/
